@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-bebas-neue: 'Bebas Neue', system-ui, sans-serif;
+    
+    /* Theme colors */
+    --primary-100: #36013f;
+    --primary-200: #622d6a;
+    --primary-300: #c387c9;
+    --accent-100: #FF7061;
+    --accent-200: #8f0010;
+    --text-100: #FFFFFF;
+    --text-200: #e0e0e0;
+    --bg-100: #000000; /* Pure black background */
+    --bg-200: #0a0a0a; /* Very slight dark grey for surfaces */
+    --bg-300: #121212; /* Lighter dark grey for elevated surfaces */
+  }
+  
+  body {
+    @apply bg-background text-text-primary antialiased;
+    background-color: var(--bg-100);
+    color: var(--text-100);
+    /* Ensure no background patterns */
+    background-image: none;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-primary uppercase tracking-wide;
+    color: var(--primary-300);
+  }
+
+  p {
+    @apply text-text-secondary tracking-wide;
+    color: var(--text-200);
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 
+           rounded-lg text-lg uppercase tracking-wider transition-all
+           focus:outline-none focus:ring-2 focus:ring-primary/50
+           disabled:opacity-50 hover:scale-105 active:scale-100;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-text-primary hover:bg-primary-light
+           shadow-lg;
+    background-color: var(--primary-200);
+    color: var(--text-100);
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--primary-300);
+  }
+
+  .btn-accent {
+    @apply bg-accent text-text-primary hover:bg-accent-light
+           shadow-lg;
+    background-color: var(--accent-100);
+    color: var(--text-100);
+  }
+  
+  .btn-accent:hover {
+    background-color: var(--accent-200);
+  }
+
+  .nav-link {
+    @apply text-text-secondary hover:text-text-primary text-lg uppercase tracking-wider
+           transition-colors relative after:absolute after:bottom-0 
+           after:left-0 after:right-0 after:h-[2px] after:bg-primary 
+           after:scale-x-0 hover:after:scale-x-100 after:transition-transform;
+    color: var(--text-200);
+  }
+  
+  .nav-link:hover {
+    color: var(--text-100);
+  }
+  
+  .nav-link::after {
+    background-color: var(--primary-300);
+  }
+
+  .card {
+    @apply backdrop-blur-sm border rounded-xl p-8 transition-all
+           hover:shadow-lg;
+    background-color: var(--bg-200);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .card:hover {
+    border-color: var(--primary-300);
+    box-shadow: 0 10px 25px -5px rgba(99, 45, 106, 0.2);
+  }
+
+  .input {
+    @apply h-14 w-full rounded-lg border px-5 py-2 text-lg transition-colors backdrop-blur-sm
+           focus:outline-none focus:ring-1
+           disabled:cursor-not-allowed disabled:opacity-50
+           tracking-wider uppercase;
+    background-color: var(--bg-200);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-100);
+  }
+  
+  .input:focus {
+    border-color: var(--primary-300);
+    box-shadow: 0 0 0 2px rgba(195, 135, 201, 0.2);
+  }
+  
+  .input::placeholder {
+    color: rgba(224, 224, 224, 0.5);
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent uppercase tracking-wider;
+    background-image: linear-gradient(to right, var(--primary-200), var(--primary-300));
+  }
+
+  .bg-blur {
+    @apply backdrop-blur-xl backdrop-saturate-150 border-b;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .glow {
+    text-shadow: 0 0 10px var(--primary-300), 0 0 20px var(--primary-300);
+  }
+  
+  .glow-accent {
+    text-shadow: 0 0 10px var(--accent-100), 0 0 20px var(--accent-100);
+  }
+}
