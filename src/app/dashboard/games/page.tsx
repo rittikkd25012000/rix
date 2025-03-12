@@ -128,22 +128,6 @@ export default function GamesPage() {
       icon: FiZap,
       color: 'from-green-600 to-green-900',
       path: '/dashboard/games/guess'
-    },
-    {
-      id: 'timeline',
-      title: 'Movie Timeline Challenge',
-      description: 'Place movies in chronological order of their release',
-      icon: FiClock,
-      color: 'from-yellow-600 to-yellow-900',
-      path: '/dashboard/games/timeline'
-    },
-    {
-      id: 'prediction',
-      title: 'Movie Prediction Game',
-      description: 'Predict outcomes of upcoming movies and earn points',
-      icon: FiBarChart2,
-      color: 'from-red-600 to-red-900',
-      path: '/dashboard/games/prediction'
     }
   ]
 

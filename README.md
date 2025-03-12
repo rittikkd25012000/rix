@@ -1,8 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RIX 3.0 - Modern Movie Streaming Platform
+
+RIX 3.0 is an enhanced version of the original RIX platform, built with Next.js 15, React 19, Tailwind CSS, and Supabase. This version features a more reliable architecture, improved UI components, and better performance.
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -10,13 +22,66 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Features
+
+- 🎬 Responsive movie browsing experience
+- 🌙 Dark mode optimized design
+- 🔍 Advanced search functionality
+- 👤 User authentication via Supabase
+- 💾 Personal watchlist management
+- 🔄 Continue watching progress tracking
+- 🔔 Notifications system
+- 📱 Fully responsive across all devices
+
+## Architecture Improvements
+
+RIX 3.0 includes several architectural improvements over previous versions:
+
+- Simplified component structure for better reliability
+- Enhanced error handling throughout the application
+- Optimized image and asset loading
+- Improved animation performance
+- Minimized client-side errors with fallback components
+
+## Project Structure
+
+RIX 3.0 is organized as follows:
+
+- `/src/app`: Main application pages using Next.js App Router
+- `/src/components`: Reusable UI components
+  - `/ui`: Basic UI elements
+  - `/layout`: Layout components
+  - `/minimal`: Simplified components for reliability
+- `/src/lib`: Utility functions and libraries
+- `/src/context`: React context providers
+- `/src/types`: TypeScript type definitions
+
+## Environment Setup
+
+Create a `.env.local` file with the following variables:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+## Deployment
+
+### Vercel Deployment
+
+1. Push your repository to GitHub
+2. Import your project in the Vercel dashboard
+3. Set up the required environment variables
+4. Deploy
+
+## License
+
+[MIT](LICENSE)
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
@@ -64,17 +129,3 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
    - Update the `NEXT_PUBLIC_SITE_URL` environment variable
 
 For more detailed instructions, check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
-
-## Project Structure
-
-RIX is a movie streaming platform built with:
-- Next.js for the frontend framework
-- Tailwind CSS for styling
-- Supabase for backend services and authentication
-- TypeScript for type safety
-
-Key directories:
-- `/src/app`: Main application pages
-- `/src/components`: Reusable UI components
-- `/src/lib`: Utility functions and libraries
-- `/src/types`: TypeScript type definitions

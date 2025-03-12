@@ -82,14 +82,45 @@ const triviaQuestions = [
 
 export default function TriviaGame() {
   const { user } = useAuth()
-  const [gameState, setGameState] = useState<'start' | 'playing' | 'result'>('start')
+  const [gameState, setGameState] = useState<'start' | 'playing' | 'result'>(() => {
+    // Try to restore game state from localStorage
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('triviaGameState')
+      if (savedState) {
+        return JSON.parse(savedState).gameState || 'start'
+      }
+    }
+    return 'start'
+  })
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
   const [isAnswerChecked, setIsAnswerChecked] = useState(false)
-  const [score, setScore] = useState(0)
+  const [score, setScore] = useState(() => {
+    // Try to restore score from localStorage
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('triviaGameState')
+      if (savedState) {
+        return JSON.parse(savedState).score || 0
+      }
+    }
+    return 0
+  })
   const [timeLeft, setTimeLeft] = useState(15)
   const [gameQuestions, setGameQuestions] = useState<typeof triviaQuestions>([])
-  
+  const [error, setError] = useState<string | null>(null)
+
+  // Save game state to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('triviaGameState', JSON.stringify({
+        gameState,
+        score,
+        currentQuestionIndex,
+        gameQuestions
+      }))
+    }
+  }, [gameState, score, currentQuestionIndex, gameQuestions])
+
   // Reset timer when moving to a new question
   useEffect(() => {
     if (gameState !== 'playing') return;
@@ -108,51 +139,121 @@ export default function TriviaGame() {
       });
     }, 1000);
     
-    return () => clearInterval(timer);
-  }, [currentQuestionIndex, gameState]);
+    // Cleanup timer on unmount or state change
+    return () => {
+      clearInterval(timer)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('triviaGameState', JSON.stringify({
+          gameState,
+          score,
+          currentQuestionIndex,
+          gameQuestions
+        }))
+      }
+    };
+  }, [currentQuestionIndex, gameState, isAnswerChecked]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('triviaGameState')
+      }
+    }
+  }, [])
   
   // Start game function
   const startGame = () => {
-    // Shuffle and select 5 random questions
-    const shuffled = [...triviaQuestions].sort(() => 0.5 - Math.random());
-    setGameQuestions(shuffled.slice(0, 5));
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setGameState('playing');
+    try {
+      // Shuffle and select 5 random questions
+      const shuffled = [...triviaQuestions].sort(() => 0.5 - Math.random());
+      setGameQuestions(shuffled.slice(0, 5));
+      setCurrentQuestionIndex(0);
+      setScore(0);
+      setGameState('playing');
+      setError(null);
+    } catch (err) {
+      setError('Failed to start game. Please try again.')
+      console.error('Error starting game:', err)
+    }
   };
   
   // Check answer function
   const checkAnswer = (answer: string | null) => {
-    if (isAnswerChecked) return;
-    
-    setSelectedAnswer(answer);
-    setIsAnswerChecked(true);
-    
-    const currentQuestion = gameQuestions[currentQuestionIndex];
-    if (answer === currentQuestion.correctAnswer) {
-      setScore((prev) => prev + 1);
-    }
-    
-    // Move to next question after delay
-    setTimeout(() => {
-      if (currentQuestionIndex < gameQuestions.length - 1) {
-        setCurrentQuestionIndex((prev) => prev + 1);
-        setSelectedAnswer(null);
-        setIsAnswerChecked(false);
-      } else {
-        setGameState('result');
+    try {
+      if (isAnswerChecked) return;
+      
+      setSelectedAnswer(answer);
+      setIsAnswerChecked(true);
+      
+      const currentQuestion = gameQuestions[currentQuestionIndex];
+      if (answer === currentQuestion.correctAnswer) {
+        setScore((prev: number) => prev + 1);
       }
-    }, 1500);
+      
+      // Move to next question after delay
+      setTimeout(() => {
+        if (currentQuestionIndex < gameQuestions.length - 1) {
+          setCurrentQuestionIndex((prev) => prev + 1);
+          setSelectedAnswer(null);
+          setIsAnswerChecked(false);
+        } else {
+          setGameState('result');
+          // Save high score
+          if (typeof window !== 'undefined') {
+            const highScore = localStorage.getItem('triviaHighScore')
+            if (!highScore || score > parseInt(highScore)) {
+              localStorage.setItem('triviaHighScore', score.toString())
+            }
+          }
+        }
+      }, 1500);
+    } catch (err) {
+      setError('Failed to check answer. Please try again.')
+      console.error('Error checking answer:', err)
+    }
   };
   
   // Restart game function
   const restartGame = () => {
-    setGameState('start');
+    try {
+      setGameState('start');
+      setError(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('triviaGameState')
+      }
+    } catch (err: any) {
+      setError('Failed to restart game. Please try again.')
+      console.error('Error restarting game:', err)
+    }
   };
   
   if (!user) return null;
   
   const currentQuestion = gameQuestions[currentQuestionIndex];
+
+  // Show error message if there's an error
+  if (error) {
+    return (
+      <div className="min-h-screen pb-20 pt-24 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-4">
+            <p className="text-red-500">{error}</p>
+          </div>
+          <button
+            onClick={() => {
+              setError(null)
+              restartGame()
+            }}
+            className="px-6 py-3 text-white font-bold rounded-lg transition-colors"
+            style={{ backgroundColor: 'var(--primary-200)' }}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
   
   return (
     <div className="min-h-screen pb-20 pt-24 px-4">
