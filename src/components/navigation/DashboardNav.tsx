@@ -20,6 +20,7 @@ import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { slideIn, slideUp } from '@/utils/animation'
 import Logo from '@/components/Logo'
+import AnimatedLogo from '@/components/AnimatedLogo'
 
 export default function DashboardNav() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -138,7 +139,7 @@ export default function DashboardNav() {
                 scale: 1.05
               }}
             >
-              <Logo className="h-10 w-auto" linkWrapper={false} scrollProgress={scrollProgress} />
+              <AnimatedLogo className="h-10 w-auto" linkWrapper={false} scrollProgress={scrollProgress} />
             </motion.div>
           </Link>
           

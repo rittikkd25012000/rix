@@ -6,6 +6,7 @@ import { RatingsProvider } from '@/context/RatingsContext'
 import { ContinueWatchingProvider } from '@/context/ContinueWatchingContext'
 import { SocialProvider } from '@/context/SocialContext'
 import Logo from "@/components/Logo"
+import AnimatedLogo from "@/components/AnimatedLogo"
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion'
 import { useState, useEffect, Suspense, memo } from 'react'
@@ -13,6 +14,7 @@ import { usePriorityPrefetch } from '@/utils/routePrefetch'
 
 // Memoize static components to prevent unnecessary re-renders
 const MemoizedLogo = memo(Logo)
+const MemoizedAnimatedLogo = memo(AnimatedLogo)
 
 // Enhanced loading fallback with animated gradient
 const LoadingFallback = () => (
@@ -130,7 +132,7 @@ export default function Template({
                             damping: 20 
                           }}
                         >
-                          <MemoizedLogo className="h-24 w-auto" />
+                          <MemoizedAnimatedLogo className="h-24 w-auto" />
                           <motion.div 
                             className="mt-6 h-1 w-40 mx-auto bg-bg-300/30 rounded-full overflow-hidden"
                             initial={{ opacity: 0 }}
