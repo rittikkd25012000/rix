@@ -6,30 +6,33 @@
   :root {
     --font-bebas-neue: 'Bebas Neue', system-ui, sans-serif;
     
-    /* Theme colors */
-    --primary-100: #36013f;
-    --primary-200: #622d6a;
-    --primary-300: #c387c9;
-    --accent-100: #FF7061;
-    --accent-200: #8f0010;
+    /* Enhanced Theme colors - more vibrant purple gradient */
+    --primary-100: #3a0446;
+    --primary-200: #6c1b8e;
+    --primary-300: #cb5ce8;
+    --accent-100: #ff3a5f;
+    --accent-200: #b90022;
     --text-100: #FFFFFF;
     --text-200: #e0e0e0;
-    --bg-100: #000000; /* Pure black background */
-    --bg-200: #0a0a0a; /* Very slight dark grey for surfaces */
-    --bg-300: #121212; /* Lighter dark grey for elevated surfaces */
+    --bg-100: #08080d; /* Slightly blueish black for more depth */
+    --bg-200: #10101a; /* Darker surface with blue tint */
+    --bg-300: #1a1a2e; /* Medium dark blue for elevated surfaces */
   }
   
   body {
     @apply bg-background text-text-primary antialiased;
     background-color: var(--bg-100);
     color: var(--text-100);
-    /* Ensure no background patterns */
-    background-image: none;
+    /* Add subtle gradient background */
+    background-image: radial-gradient(circle at 50% 0%, 
+                       rgba(106, 27, 154, 0.1) 0%, 
+                       rgba(8, 8, 13, 0) 60%);
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply text-primary uppercase tracking-wide;
     color: var(--primary-300);
+    text-shadow: 0 0 10px rgba(203, 92, 232, 0.3);
   }
 
   p {
@@ -44,28 +47,49 @@
            rounded-lg text-lg uppercase tracking-wider transition-all
            focus:outline-none focus:ring-2 focus:ring-primary/50
            disabled:opacity-50 hover:scale-105 active:scale-100;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+    z-index: -1;
+  }
+
+  .btn:hover::before {
+    left: 100%;
   }
 
   .btn-primary {
-    @apply bg-primary text-text-primary hover:bg-primary-light
-           shadow-lg;
-    background-color: var(--primary-200);
+    @apply shadow-lg;
+    background: linear-gradient(135deg, var(--primary-200), var(--primary-300));
     color: var(--text-100);
+    box-shadow: 0 4px 20px -5px rgba(108, 27, 142, 0.5);
   }
   
   .btn-primary:hover {
-    background-color: var(--primary-300);
+    background: linear-gradient(135deg, var(--primary-300), var(--primary-200));
+    box-shadow: 0 6px 25px -5px rgba(108, 27, 142, 0.7);
   }
 
   .btn-accent {
-    @apply bg-accent text-text-primary hover:bg-accent-light
-           shadow-lg;
-    background-color: var(--accent-100);
+    @apply shadow-lg;
+    background: linear-gradient(135deg, var(--accent-100), var(--accent-200));
     color: var(--text-100);
+    box-shadow: 0 4px 20px -5px rgba(255, 58, 95, 0.5);
   }
   
   .btn-accent:hover {
-    background-color: var(--accent-200);
+    background: linear-gradient(135deg, var(--accent-200), var(--accent-100));
+    box-shadow: 0 6px 25px -5px rgba(255, 58, 95, 0.7);
   }
 
   .nav-link {
@@ -74,26 +98,40 @@
            after:left-0 after:right-0 after:h-[2px] after:bg-primary 
            after:scale-x-0 hover:after:scale-x-100 after:transition-transform;
     color: var(--text-200);
+    position: relative;
+    padding: 0.5rem 0;
+    transition: all 0.3s ease;
   }
   
   .nav-link:hover {
     color: var(--text-100);
+    transform: translateY(-2px);
   }
   
   .nav-link::after {
     background-color: var(--primary-300);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  
+  .nav-link:hover::after {
+    opacity: 1;
+    transform: scaleX(1);
+    box-shadow: 0 0 10px var(--primary-300);
   }
 
   .card {
     @apply backdrop-blur-sm border rounded-xl p-8 transition-all
            hover:shadow-lg;
-    background-color: var(--bg-200);
-    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(16, 16, 26, 0.7);
+    border-color: rgba(255, 255, 255, 0.07);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   }
   
   .card:hover {
     border-color: var(--primary-300);
-    box-shadow: 0 10px 25px -5px rgba(99, 45, 106, 0.2);
+    box-shadow: 0 10px 30px -5px rgba(203, 92, 232, 0.25);
+    transform: translateY(-5px);
   }
 
   .input {
@@ -101,14 +139,16 @@
            focus:outline-none focus:ring-1
            disabled:cursor-not-allowed disabled:opacity-50
            tracking-wider uppercase;
-    background-color: var(--bg-200);
-    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(16, 16, 26, 0.7);
+    border-color: rgba(255, 255, 255, 0.07);
     color: var(--text-100);
+    transition: all 0.3s ease;
   }
   
   .input:focus {
     border-color: var(--primary-300);
-    box-shadow: 0 0 0 2px rgba(195, 135, 201, 0.2);
+    box-shadow: 0 0 15px rgba(203, 92, 232, 0.25);
+    transform: translateY(-2px);
   }
   
   .input::placeholder {
@@ -119,13 +159,13 @@
 @layer utilities {
   .text-gradient {
     @apply bg-clip-text text-transparent uppercase tracking-wider;
-    background-image: linear-gradient(to right, var(--primary-200), var(--primary-300));
+    background-image: linear-gradient(to right, var(--primary-300), var(--accent-100));
   }
 
   .bg-blur {
     @apply backdrop-blur-xl backdrop-saturate-150 border-b;
-    background-color: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(8, 8, 13, 0.8);
+    border-color: rgba(255, 255, 255, 0.07);
   }
   
   .glow {
@@ -134,5 +174,51 @@
   
   .glow-accent {
     text-shadow: 0 0 10px var(--accent-100), 0 0 20px var(--accent-100);
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  
+  .glass-card {
+    background: rgba(26, 26, 46, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  .neon-border {
+    position: relative;
+  }
+  
+  .neon-border::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(45deg, var(--primary-300), var(--accent-100), var(--primary-300));
+    filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .neon-border:hover::after {
+    opacity: 0.7;
   }
 }
