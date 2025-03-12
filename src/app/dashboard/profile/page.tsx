@@ -54,7 +54,15 @@ export default function ProfilePage() {
               <div>
                 <label className="text-sm text-gray-600 dark:text-gray-400">Member Since</label>
                 <div className="text-lg">
-                  {new Date(user.created_at).toLocaleDateString()}
+                  {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  }) : new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
                 </div>
               </div>
             </div>

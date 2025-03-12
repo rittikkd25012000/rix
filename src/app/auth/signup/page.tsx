@@ -10,14 +10,17 @@ const SignUpPage = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
+    // Validate password match
     if (password !== confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
@@ -25,16 +28,26 @@ const SignUpPage = () => {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      setLoading(true)
+      setError(null)
+
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
       })
 
       if (error) throw error
 
+      setSuccess(true)
       router.push('/dashboard')
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Sign-up failed')
+      console.error('Error signing up:', error)
+      setError('Sign-up failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -46,6 +59,20 @@ const SignUpPage = () => {
         <div className="card">
           <h2 className="text-5xl mb-8 text-center text-gradient">CREATE ACCOUNT</h2>
           <form onSubmit={handleSignUp} className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-lg tracking-wider mb-2 text-gray-300">
+                FULL NAME
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="input"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
             <div>
               <label htmlFor="email" className="block text-lg tracking-wider mb-2 text-gray-300">
                 EMAIL ADDRESS

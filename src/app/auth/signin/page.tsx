@@ -18,16 +18,20 @@ const SignInPage = () => {
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      setLoading(true)
+      setError(null)
+      
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-
+      
       if (error) throw error
-
+      
       router.push('/dashboard')
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Sign-in failed')
+      console.error('Error signing in:', error)
+      setError('Invalid login credentials. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -80,15 +84,12 @@ const SignInPage = () => {
               {loading ? 'SIGNING IN...' : 'SIGN IN'}
             </button>
             <div className="text-center space-y-4">
-              <p className="text-lg text-gray-400 tracking-wider">
-                DON'T HAVE AN ACCOUNT?
+              <p className="text-center text-sm text-gray-500 mt-4">
+                Don&apos;t have an account?{' '}
+                <Link href="/auth/signup" className="text-blue-600 hover:underline">
+                  Sign up
+                </Link>
               </p>
-              <Link 
-                href="/auth/signup" 
-                className="text-lg text-primary hover:text-primary/90 tracking-wider inline-block"
-              >
-                CREATE ACCOUNT
-              </Link>
             </div>
           </form>
         </div>

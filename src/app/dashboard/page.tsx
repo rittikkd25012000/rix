@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useMyList } from '@/context/MyListContext'
 import { supabase } from '@/lib/supabase'
@@ -22,7 +22,8 @@ import {
   FiX,
   FiShare2,
   FiTag,
-  FiArrowRight
+  FiArrowRight,
+  FiRefreshCw
 } from 'react-icons/fi'
 import MovieCardSkeleton from '@/components/MovieCardSkeleton'
 import MovieCard from '@/components/MovieCard'
@@ -48,6 +49,7 @@ export default function DashboardPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [likedMovies, setLikedMovies] = useState<number[]>([])
   const [scrollY, setScrollY] = useState(0)
+  const [retryCount, setRetryCount] = useState(0)
 
   // Scroll position for parallax effect
   useEffect(() => {
@@ -59,29 +61,101 @@ export default function DashboardPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    async function fetchMovies() {
-      try {
-        const { data, error } = await supabase
-          .from('movies')
-          .select('*')
-          .order('title')
+  const fetchMovies = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase
+        .from('movies')
+        .select('*')
+        .order('title');
 
-        if (error) throw error
+      if (error) throw error;
 
-        setMovies(data || [])
-      } catch (error) {
-        console.error('Error fetching movies:', error)
-        setError(error instanceof Error ? error.message : 'Failed to load movies')
-      } finally {
-        setLoading(false)
+      if (data && data.length > 0) {
+        setMovies(data);
+      } else {
+        // If no movies found, provide sample data for demonstration
+        setMovies([
+          {
+            id: 1,
+            title: "The Matrix",
+            description: "A computer hacker learns about the true nature of reality and his role in the war against its controllers.",
+            thumbnail_url: "https://source.unsplash.com/random/300x450?movie",
+            release_year: 1999,
+            genre: ["Action", "Sci-Fi"]
+          },
+          {
+            id: 2,
+            title: "Inception",
+            description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+            thumbnail_url: "https://source.unsplash.com/random/300x450?inception",
+            release_year: 2010,
+            genre: ["Action", "Sci-Fi", "Thriller"]
+          },
+          {
+            id: 3,
+            title: "The Shawshank Redemption",
+            description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+            thumbnail_url: "https://source.unsplash.com/random/300x450?prison",
+            release_year: 1994,
+            genre: ["Drama"]
+          },
+          {
+            id: 4,
+            title: "The Godfather",
+            description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+            thumbnail_url: "https://source.unsplash.com/random/300x450?mafia",
+            release_year: 1972,
+            genre: ["Crime", "Drama"]
+          },
+          {
+            id: 5,
+            title: "Pulp Fiction",
+            description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+            thumbnail_url: "https://source.unsplash.com/random/300x450?pulp",
+            release_year: 1994,
+            genre: ["Crime", "Drama"]
+          }
+        ]);
       }
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load movies');
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    fetchMovies()
-  }, [])
+  useEffect(() => {
+    fetchMovies();
+  }, [fetchMovies]);
 
-  if (!user) return null
+  // Load liked movies from localStorage
+  useEffect(() => {
+    try {
+      const savedLikedMovies = localStorage.getItem('likedMovies');
+      if (savedLikedMovies) {
+        setLikedMovies(JSON.parse(savedLikedMovies));
+      }
+    } catch (error) {
+      console.error('Error loading liked movies:', error);
+    }
+  }, []);
+
+  // Save liked movies to localStorage
+  useEffect(() => {
+    localStorage.setItem('likedMovies', JSON.stringify(likedMovies));
+  }, [likedMovies]);
+
+  if (!user) return null;
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    fetchMovies();
+  };
+
   if (loading) return (
     <div className="flex justify-center items-center min-h-screen">
       <motion.div 
@@ -93,17 +167,33 @@ export default function DashboardPage() {
         <p className="text-gray-400">Loading amazing content for you...</p>
       </motion.div>
     </div>
-  )
-  if (error) return <div className="text-red-500 text-center py-12">{error}</div>
+  );
 
-  const featuredMovie = movies[0]
+  if (error) return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+      <div className="text-red-500 text-center py-12 max-w-md">
+        <FiX size={48} className="mx-auto mb-4" />
+        <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
+        <p className="mb-6">{error}</p>
+        <button 
+          onClick={handleRetry}
+          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-light text-white px-6 py-3 rounded-lg transition-colors"
+        >
+          <FiRefreshCw size={18} />
+          Try Again
+        </button>
+      </div>
+    </div>
+  );
+
+  const featuredMovie = movies[0];
 
   // Main categories with clear purposes
   const mainCategories = [
     { id: 'trending', name: 'Trending', icon: FiTrendingUp, description: 'Most popular right now' },
     { id: 'new', name: 'New Releases', icon: FiCalendar, description: 'Recently added content' },
     { id: 'mylist', name: 'My List', icon: FiBookmark, description: 'Your saved content' },
-  ]
+  ];
 
   // Genres for content filtering
   const genres = [
@@ -113,14 +203,14 @@ export default function DashboardPage() {
     { id: 'scifi', name: 'Sci-Fi' },
     { id: 'horror', name: 'Horror' },
     { id: 'romance', name: 'Romance' },
-  ]
+  ];
 
   const handlePlayMovie = (movieId: number, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     console.log(`Playing movie ${movieId}`);
     // In a real app, this would navigate to a player or start streaming
-    window.alert(`Now playing movie ID: ${movieId}`);
-  }
+    router.push(`/dashboard/watch/${movieId}`);
+  };
 
   const handleAddToWatchlist = (movie: Movie, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
@@ -142,7 +232,7 @@ export default function DashboardPage() {
       addToList(listItem);
       console.log(`Added movie ${movie.id} to My List`);
     }
-  }
+  };
 
   const handleLikeMovie = (movieId: number, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
@@ -152,14 +242,14 @@ export default function DashboardPage() {
     } else {
       setLikedMovies([...likedMovies, movieId]);
     }
-  }
+  };
 
   const handleMoreInfo = (movieId: number, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     console.log(`Showing more info for movie ${movieId}`);
-    // In a real app, this would navigate to a details page or open a modal
-    window.location.href = `/dashboard/movies/${movieId}`;
-  }
+    // Navigate to details page
+    router.push(`/dashboard/movies/${movieId}`);
+  };
 
   const handleShareMovie = (movieId: number, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
@@ -178,7 +268,18 @@ export default function DashboardPage() {
       // Fallback for browsers that don't support the Web Share API
       window.alert(`Share this link: ${shareUrl}`);
     }
-  }
+  };
+
+  // Filter movies based on active category
+  const filteredMovies = activeCategory === 'all' 
+    ? movies 
+    : activeCategory === 'mylist'
+      ? movies.filter(movie => isInList(movie.id))
+      : movies.filter(movie => 
+          movie.genre && movie.genre.some(g => 
+            g.toLowerCase() === activeCategory.toLowerCase()
+          )
+        );
 
   return (
     <div className="min-h-screen">
@@ -322,7 +423,7 @@ export default function DashboardPage() {
 
       {/* Main Categories - Simplified and more useful */}
       <div className="px-4 mt-8">
-        <div className="grid grid-cols-2 gap-2 mb-6">
+        <div className="grid grid-cols-3 gap-2 mb-6">
           {mainCategories.map((category) => (
             <motion.button
               key={category.id}
@@ -445,83 +546,107 @@ export default function DashboardPage() {
       </div>
 
       {/* Movie Grid - Enhanced with more meaningful actions */}
-      <div className="px-4 mt-8">
+      <div className="px-4 mt-8 pb-12">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Popular Right Now</h2>
+          <h2 className="text-xl font-semibold">
+            {activeCategory === 'all' ? 'Popular Right Now' : 
+             activeCategory === 'mylist' ? 'My List' : 
+             `${activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} Movies`}
+          </h2>
           <Link href="/dashboard/popular" className="flex items-center gap-1 text-sm text-primary hover:underline">
             <span>View All</span>
           </Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {movies.map((movie) => (
-            <motion.div 
-              key={movie.id} 
-              whileHover={{ scale: 1.05 }} 
-              className="group"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="aspect-[2/3] rounded-lg overflow-hidden relative">
-                <img
-                  src={movie.thumbnail_url}
-                  alt={movie.title}
-                  className="w-full h-full object-cover cursor-pointer"
-                  onClick={() => handleMoreInfo(movie.id)}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="absolute bottom-0 p-4">
-                    <h3 className="text-sm font-semibold">{movie.title}</h3>
-                    <p className="text-xs text-gray-300">{movie.release_year}</p>
-                    
-                    {/* Movie card action buttons - More meaningful with visual feedback */}
-                    <div className="flex gap-2 mt-2">
-                      <button 
-                        className="p-2 bg-primary rounded-full text-white hover:bg-primary/80 transition-colors"
-                        onClick={(e) => handlePlayMovie(movie.id, e)}
-                        aria-label="Play"
-                      >
-                        <FiPlay size={16} />
-                      </button>
+        
+        {filteredMovies.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {filteredMovies.map((movie) => (
+              <motion.div 
+                key={movie.id} 
+                whileHover={{ scale: 1.05 }} 
+                className="group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="aspect-[2/3] rounded-lg overflow-hidden relative">
+                  <img
+                    src={movie.thumbnail_url}
+                    alt={movie.title}
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => handleMoreInfo(movie.id)}
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-0 p-4">
+                      <h3 className="text-sm font-semibold">{movie.title}</h3>
+                      <p className="text-xs text-gray-300">{movie.release_year}</p>
                       
-                      <button 
-                        className={`p-2 rounded-full transition-colors ${
-                          isInList(movie.id)
-                            ? 'bg-primary/30 text-primary'
-                            : 'bg-black/40 text-white/80 hover:text-white'
-                        }`}
-                        onClick={(e) => handleAddToWatchlist(movie, e)}
-                        aria-label={isInList(movie.id) ? "Remove from watchlist" : "Add to watchlist"}
-                      >
-                        {isInList(movie.id) ? <FiCheck size={16} /> : <FiPlus size={16} />}
-                      </button>
-                      
-                      <button 
-                        className={`p-2 rounded-full transition-colors ${
-                          likedMovies.includes(movie.id)
-                            ? 'bg-red-500/30 text-red-500'
-                            : 'bg-black/40 text-white/80 hover:text-white'
-                        }`}
-                        onClick={(e) => handleLikeMovie(movie.id, e)}
-                        aria-label={likedMovies.includes(movie.id) ? "Unlike" : "Like"}
-                      >
-                        <FiHeart size={16} />
-                      </button>
-                      
-                      <button 
-                        className="p-2 bg-black/40 rounded-full text-white/80 hover:text-white transition-colors"
-                        onClick={(e) => handleShareMovie(movie.id, e)}
-                        aria-label="Share"
-                      >
-                        <FiShare2 size={16} />
-                      </button>
+                      {/* Movie card action buttons - More meaningful with visual feedback */}
+                      <div className="flex gap-2 mt-2">
+                        <button 
+                          className="p-2 bg-primary rounded-full text-white hover:bg-primary/80 transition-colors"
+                          onClick={(e) => handlePlayMovie(movie.id, e)}
+                          aria-label="Play"
+                        >
+                          <FiPlay size={16} />
+                        </button>
+                        
+                        <button 
+                          className={`p-2 rounded-full transition-colors ${
+                            isInList(movie.id)
+                              ? 'bg-primary/30 text-primary'
+                              : 'bg-black/40 text-white/80 hover:text-white'
+                          }`}
+                          onClick={(e) => handleAddToWatchlist(movie, e)}
+                          aria-label={isInList(movie.id) ? "Remove from watchlist" : "Add to watchlist"}
+                        >
+                          {isInList(movie.id) ? <FiCheck size={16} /> : <FiPlus size={16} />}
+                        </button>
+                        
+                        <button 
+                          className={`p-2 rounded-full transition-colors ${
+                            likedMovies.includes(movie.id)
+                              ? 'bg-red-500/30 text-red-500'
+                              : 'bg-black/40 text-white/80 hover:text-white'
+                          }`}
+                          onClick={(e) => handleLikeMovie(movie.id, e)}
+                          aria-label={likedMovies.includes(movie.id) ? "Unlike" : "Like"}
+                        >
+                          <FiHeart size={16} />
+                        </button>
+                        
+                        <button 
+                          className="p-2 bg-black/40 rounded-full text-white/80 hover:text-white transition-colors"
+                          onClick={(e) => handleShareMovie(movie.id, e)}
+                          aria-label="Share"
+                        >
+                          <FiShare2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <FiInfo size={48} className="text-gray-500 mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No movies found</h3>
+            <p className="text-gray-400 mb-6 max-w-md">
+              {activeCategory === 'mylist' 
+                ? "You haven't added any movies to your list yet." 
+                : `No ${activeCategory} movies available at the moment.`}
+            </p>
+            <button
+              onClick={() => setActiveCategory('all')}
+              className="bg-primary hover:bg-primary-light text-white px-6 py-3 rounded-lg transition-colors"
+            >
+              Browse All Movies
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -39,25 +39,6 @@ const nextConfig = {
       }
     ],
   },
-  // Configure asset prefix for public files
-  assetPrefix: process.env.NODE_ENV === 'production' ? undefined : undefined,
-  
-  // Ensure proper handling of media files
-  webpack(config) {
-    config.module.rules.push({
-      test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          publicPath: '/_next/static/media/',
-          outputPath: 'static/media/',
-          name: '[name].[hash].[ext]',
-        },
-      },
-    });
-    return config;
-  },
-  
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
@@ -71,8 +52,6 @@ const nextConfig = {
   },
   experimental: {
     scrollRestoration: true,
-    // Improve error handling
-    serverComponentsExternalPackages: [],
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
@@ -85,13 +64,6 @@ const nextConfig = {
   generateEtags: true,
   trailingSlash: false,
   productionBrowserSourceMaps: false,
-  // Add error handling for Vercel deployments
-  onDemandEntries: {
-    // Period (in ms) where the server will keep pages in the buffer
-    maxInactiveAge: 25 * 1000,
-    // Number of pages that should be kept simultaneously without being disposed
-    pagesBufferLength: 2,
-  },
 }
 
 module.exports = nextConfig

@@ -106,7 +106,7 @@ export default function SearchPage() {
           <h1 className="text-3xl font-bold mb-6">Search</h1>
           
           <div className="relative">
-            <div className="flex items-center bg-gray-900/50 border border-gray-700 rounded-lg overflow-hidden">
+            <div className="flex items-center bg-black border border-gray-700 rounded-lg overflow-hidden">
               <div className="px-4 text-gray-400">
                 <FiSearch size={20} />
               </div>
@@ -115,7 +115,7 @@ export default function SearchPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for movies, TV shows, genres..."
-                className="w-full py-3 px-2 bg-transparent text-white focus:outline-none"
+                className="w-full py-3 px-2 bg-black text-white focus:outline-none"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && searchQuery.trim()) {
                     window.location.href = `/dashboard/search?q=${encodeURIComponent(searchQuery.trim())}`

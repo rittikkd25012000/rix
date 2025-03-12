@@ -33,4 +33,48 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Deployment Steps for RIX
+
+1. **Prepare your repository**
+   - Ensure all changes are committed to your GitHub repository
+   - Make sure your code is free of errors and builds successfully locally
+
+2. **Set up environment variables**
+   - Copy the variables from `ENV_VARIABLES_EXAMPLE.md` to your Vercel project
+   - Add your Supabase URL and anon key in the Vercel dashboard
+   - Any other environment variables needed for your project
+
+3. **Deploy on Vercel**
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "New Project" and import your GitHub repository
+   - Configure the project settings:
+     - Framework Preset: Next.js
+     - Root Directory: ./
+     - Build Command: next build
+   - Click "Deploy"
+
+4. **Post-deployment checks**
+   - Verify that authentication works correctly
+   - Check that movie data is loading properly
+   - Test responsive design on different devices
+   - Ensure all images and assets are loading
+
+5. **Custom domain (optional)**
+   - Add a custom domain in the Vercel dashboard
+   - Update the `NEXT_PUBLIC_SITE_URL` environment variable
+
+For more detailed instructions, check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
+
+## Project Structure
+
+RIX is a movie streaming platform built with:
+- Next.js for the frontend framework
+- Tailwind CSS for styling
+- Supabase for backend services and authentication
+- TypeScript for type safety
+
+Key directories:
+- `/src/app`: Main application pages
+- `/src/components`: Reusable UI components
+- `/src/lib`: Utility functions and libraries
+- `/src/types`: TypeScript type definitions
