@@ -20,7 +20,13 @@ import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { slideIn, slideUp } from '@/utils/animation'
 import Logo from '@/components/Logo'
-import AnimatedLogo from '@/components/AnimatedLogo'
+import dynamic from 'next/dynamic'
+
+// Dynamically import AnimatedLogo with SSR disabled
+const AnimatedLogo = dynamic(() => import('@/components/AnimatedLogo'), {
+  ssr: false,
+  loading: () => <Logo className="h-10 w-auto" linkWrapper={false} />
+})
 
 export default function DashboardNav() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -31,10 +37,16 @@ export default function DashboardNav() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchActive, setSearchActive] = useState(false)
   const [activeCategory, setActiveCategory] = useState('')
+  const [useAnimatedLogo, setUseAnimatedLogo] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const lastScrollY = useRef(0)
   const ticking = useRef(false)
+
+  // Only use animated logo after hydration is complete
+  useEffect(() => {
+    setUseAnimatedLogo(true)
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -139,7 +151,11 @@ export default function DashboardNav() {
                 scale: 1.05
               }}
             >
-              <AnimatedLogo className="h-10 w-auto" linkWrapper={false} scrollProgress={scrollProgress} />
+              {useAnimatedLogo ? (
+                <AnimatedLogo className="h-10 w-auto" linkWrapper={false} scrollProgress={scrollProgress} />
+              ) : (
+                <Logo className="h-10 w-auto" linkWrapper={false} scrollProgress={scrollProgress} />
+              )}
             </motion.div>
           </Link>
           

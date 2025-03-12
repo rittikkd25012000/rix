@@ -11,10 +11,17 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion'
 import { useState, useEffect, Suspense, memo } from 'react'
 import { usePriorityPrefetch } from '@/utils/routePrefetch'
+import dynamic from 'next/dynamic'
 
 // Memoize static components to prevent unnecessary re-renders
 const MemoizedLogo = memo(Logo)
 const MemoizedAnimatedLogo = memo(AnimatedLogo)
+
+// Dynamically import the AnimatedLogo with SSR disabled, which helps prevent hydration mismatches
+const DynamicAnimatedLogo = dynamic(() => import('@/components/AnimatedLogo'), {
+  ssr: false,
+  loading: () => <MemoizedLogo className="h-24 w-auto" />
+})
 
 // Enhanced loading fallback with animated gradient
 const LoadingFallback = () => (
@@ -90,6 +97,7 @@ export default function Template({
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith('/auth');
   const [isLoading, setIsLoading] = useState(true);
+  const [errorState, setErrorState] = useState<boolean>(false);
   
   // Prefetch dashboard routes
   usePriorityPrefetch('/dashboard')
@@ -100,6 +108,33 @@ export default function Template({
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, [pathname]);
+  
+  // Global error boundary
+  useEffect(() => {
+    const handleError = () => {
+      console.error('Caught global error');
+      setErrorState(true);
+    };
+    
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+  
+  if (errorState) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-bg-100">
+        <MemoizedLogo className="h-24 w-auto mb-6" />
+        <h1 className="text-2xl font-bold text-white mb-4">Something went wrong</h1>
+        <p className="text-gray-400 mb-6">We're experiencing some technical difficulties</p>
+        <button 
+          onClick={() => window.location.href = '/dashboard'} 
+          className="btn btn-primary"
+        >
+          Go to Dashboard
+        </button>
+      </div>
+    );
+  }
   
   return (
     <LazyMotion features={domAnimation}>
@@ -132,7 +167,8 @@ export default function Template({
                             damping: 20 
                           }}
                         >
-                          <MemoizedAnimatedLogo className="h-24 w-auto" />
+                          {/* Use static logo first, it's more reliable */}
+                          <MemoizedLogo className="h-24 w-auto" />
                           <motion.div 
                             className="mt-6 h-1 w-40 mx-auto bg-bg-300/30 rounded-full overflow-hidden"
                             initial={{ opacity: 0 }}
